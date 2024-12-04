@@ -41,9 +41,9 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 // IPFS节点
-const nodeHost = ref<string>(import.meta.env.VITE_IMG_API_URL);
+const nodeHost = ref<string>(import.meta.env.VITE_IMG_API_URL || location.origin);
 // 上传接口
-const uploadAPI = ref<string>(`${import.meta.env.VITE_IMG_API_URL}/upload`);
+const uploadAPI = ref<string>(`${import.meta.env.VITE_IMG_API_URL || location.origin}/upload`);
 // 上传配置
 const UploadConfig = ref<any>({
   AcceptTypes: 'image/*', // 允许上传的类型，使用逗号分隔
