@@ -29,9 +29,7 @@ const formatURL = (v: any, key?: string) => {
   const ERROR_MSG = `${v._vh_filename} 上传失败`;
   try {
     FILE_ID = v.data.link.split('/').slice(-1)[0];
-  } catch {
-    console.log();
-  }
+  } catch {}
   if (key == 'md') {
     return FILE_ID ? `![${v._vh_filename}](${props.nodeHost}/v2/${FILE_ID})` : ERROR_MSG;
   }
