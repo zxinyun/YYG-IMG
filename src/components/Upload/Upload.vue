@@ -17,7 +17,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useToast } from '@/components/ui/toast/use-toast';
 const { toast } = useToast();
 // 参数
@@ -25,17 +25,22 @@ const props = defineProps(['modelValue', 'UploadConfig', 'uploadAPI']);
 const emits = defineEmits(['update:modelValue']);
 const UploadConfig = ref<any>(props.UploadConfig);
 // 文件上传列表变化事件
-const fileListChange = (v: Event) => {
-  if (!v.target) return;
-  const FileTarget: HTMLInputElement = v.target as HTMLInputElement;
-  const FileListArr: Array<any> = [...props.modelValue, ...Array.from(FileTarget.files || [])];
+const fileListChange = (v: Event, type: boolean = false) => {
+  let targetFileListArr: any = [];
+  if (!type) {
+    if (!v.target) return;
+    targetFileListArr = (v.target as HTMLInputElement).files || [];
+  } else {
+    targetFileListArr = v;
+  }
+  const FileListArr: Array<any> = [...props.modelValue, ...Array.from(targetFileListArr || [])];
   // 过滤不符合Size的文件
-  let fileListFilter = FileListArr.filter((i: any) => UploadConfig.value.MaxSize && i.size <= UploadConfig.value.MaxSize * 1024 * 1024);
+  let fileListFilter = FileListArr.filter((i: any) => UploadConfig.value.MaxSize && (i.size <= UploadConfig.value.MaxSize * 1024 * 1024 || i.upload_status == 'success'));
   if (fileListFilter.length != FileListArr.length) toast({ title: 'Tips', description: `已过滤Size超过 ${UploadConfig.value.MaxSize}MB 的文件` });
   // 过滤超过数量的文件
   if (UploadConfig.value.Max && fileListFilter.length > UploadConfig.value.Max) {
     toast({ title: 'Tips', description: `已过滤超过最大上传 ${UploadConfig.value.Max}个 的文件` });
-    fileListFilter = Array.from(FileTarget.files || []).slice(0, UploadConfig.value.Max);
+    fileListFilter = Array.from(targetFileListArr || []).slice(0, UploadConfig.value.Max);
   }
   emits('update:modelValue', fileListFilter);
   fileUpload(fileListFilter);
@@ -79,6 +84,18 @@ const fileUpload = async (FileListArr: Array<any>) => {
     }
   });
 };
+
+// 粘贴上传
+const pasteUpload = (v: any) => {
+  v.preventDefault();
+  const pasteData = v.clipboardData || (window as any).clipboardData;
+  const files = pasteData.files;
+  fileListChange(files, true);
+};
+
+onMounted(() => {
+  document.addEventListener('paste', pasteUpload);
+});
 </script>
 
 <style scoped lang="less">
